@@ -38,6 +38,7 @@ class Pizza(models.Model):
     crust = models.ForeignKey(Crust, on_delete=models.CASCADE)
     size = models.ForeignKey(Size, on_delete=models.CASCADE)
     price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    notes = models.TextField()
     data_added = models.DateTimeField(auto_now_add=True)
 
     def topping_to_string(self):
@@ -60,4 +61,4 @@ class Pizza(models.Model):
 
 
     def __str__(self):
-        return f'A {self.type.name} pizza with {self.topping_to_string()} on top.'
+        return f'A {self.type.name} pizza with {self.topping_to_string()} on top, price: {self.price}.'
