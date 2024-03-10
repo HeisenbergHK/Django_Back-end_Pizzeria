@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
+from django.http import Http404
 
 from .models import Pizza, Type
 from .forms import PizzaForm
@@ -17,7 +18,7 @@ def pizzas(request):
 @login_required
 def orders(request):
     """This page shows all the orders"""
-    orders = Pizza.objects.order_by('-date_added')
+    orders = Pizza.objects.order_by('-date_added').filter(owner=request.user)
     context = {'orders': orders}
     return render(request, 'making_pizza/orders.html', context)
 
@@ -25,6 +26,11 @@ def orders(request):
 def order(request, order_id):
     """This page shows a single pizza in detail"""
     pizza = Pizza.objects.get(id=order_id)
+    
+    # Make sure the pizza belongs to the current user.
+    if pizza.owner != request.user:
+        raise Http404
+    
     context = {'extra_topping': pizza.topping_to_string,
                'type': pizza.type,
                'crust': pizza.crust,
@@ -43,6 +49,8 @@ def new_order(request):
     else:
         form = PizzaForm(data=request.POST)
         if form.is_valid():
+            pizza = form.save(commit=False)
+            pizza.owner = request.user
             pizza = form.save()
 
             toppings = pizza.extra_topping.all()
