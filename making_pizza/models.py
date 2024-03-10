@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.models import User
 
 class Type(models.Model):
     name = models.CharField(max_length=200)
@@ -33,6 +34,7 @@ class Size(models.Model):
 
 
 class Pizza(models.Model):
+    owner = models.ForeignKey(User, on_delete=models.CASCADE)
     type = models.ForeignKey(Type, on_delete=models.CASCADE)
     extra_topping = models.ManyToManyField(Topping)
     crust = models.ForeignKey(Crust, on_delete=models.CASCADE)

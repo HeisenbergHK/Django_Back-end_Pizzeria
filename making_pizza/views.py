@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
 
 from .models import Pizza, Type
 from .forms import PizzaForm
@@ -13,12 +14,14 @@ def pizzas(request):
     context = {'pizzas': pizzas}
     return render(request, 'making_pizza/pizzas.html', context)
 
+@login_required
 def orders(request):
     """This page shows all the orders"""
     orders = Pizza.objects.order_by('-date_added')
     context = {'orders': orders}
     return render(request, 'making_pizza/orders.html', context)
 
+@login_required
 def order(request, order_id):
     """This page shows a single pizza in detail"""
     pizza = Pizza.objects.get(id=order_id)
@@ -30,7 +33,7 @@ def order(request, order_id):
                'price':pizza.price}
     return render(request, 'making_pizza/order.html', context)
 
-
+@login_required
 def new_order(request):
     """Create a new pizza"""
     if request.method != 'POST':

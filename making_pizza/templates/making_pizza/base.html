@@ -2,7 +2,21 @@
     <a href="{% url 'making_pizza:index' %}">Home</a> - 
     <a href="{% url 'making_pizza:pizzas' %}">Pizzas</a> - 
     <a href="{% url 'making_pizza:orders' %}">Orders</a> - 
-    <a href="{% url 'making_pizza:new_order'%}">Order</a>
+    <a href="{% url 'making_pizza:new_order'%}">Order</a> - 
+    {% if user.is_authenticated %}
+        Hello, {{ user.username }}
+    {% else %}
+    <a href="{% url 'accounts:register' %}">Register</a> - 
+    <a href="{% url 'accounts:login' %}">Log in</a>
+    {% endif %}
 </p>
 
 {% block content%}{% endblock content %}
+
+{% if user.is_authenticated %}
+<hr />
+<form action="{% url 'accounts:logout' %}" method="post">
+    {% csrf_token %}
+    <button name="submit">Log out</button>
+</form>
+{% endif %}
