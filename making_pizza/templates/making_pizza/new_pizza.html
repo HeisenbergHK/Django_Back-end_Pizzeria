@@ -1,9 +1,9 @@
 {% extends 'making_pizza/base.html' %}
 
 {% block content %}
-    <p>Add a new topic:</p>
+    <p>Create your own pizza:</p>
 
-    <form action="making_pizza:new_pizza" method="post">
+    <form action="{% url 'making_pizza:new_pizza' %}" method="post">
         {% csrf_token %}
         {{ form.as_div }}
         <button name="submit">Add Pizza</button>

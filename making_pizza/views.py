@@ -13,6 +13,17 @@ def pizzas(request):
     context = {'pizzas': pizzas}
     return render(request, 'making_pizza/pizzas.html', context)
 
+def pizza(request, pizza_id):
+    """This page shows a single pizza in detail"""
+    pizza = Pizza.objects.get(id=pizza_id)
+    context = {'extra_topping': pizza.topping_to_string,
+               'type': pizza.type,
+               'crust': pizza.crust,
+               'size': pizza.size,
+               'notes': pizza.notes,
+               'price':pizza.price}
+    return render(request, 'making_pizza/pizza.html', context)
+
 
 def new_pizza(request):
     """Create a new pizza"""
@@ -22,10 +33,11 @@ def new_pizza(request):
         form = PizzaForm()
     else:
         form = PizzaForm(data=request.POST)
-        form.price = 10
         if form.is_valid():
-            form.save()
-            return redirect('making_pizza:index')
+            pizza = form.save(commit=False)
+            pizza.price = 10
+            pizza.save()
+            return redirect('making_pizza:pizzas')
     
     # Display a blank or invalid form.
     context = {'form': form}

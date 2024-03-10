@@ -1,0 +1,13 @@
+{% extends 'making_pizza/base.html' %}
+
+{% block content %}
+
+<p>Type: {{type.name}}</p>
+<p>Extra Topping: {{extra_topping}}</p>
+<p>Crust: {{crust.name}}</p>
+<p>Size: {{size.name}}</p>
+<p>Notes: {{notes}}</p>
+<hr>
+<p>Price: {{price}}</p>
+
+{% endblock content%}

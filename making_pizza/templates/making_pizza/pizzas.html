@@ -4,8 +4,10 @@
 <p>Pizzas</p>
 <ul>
     {% for pizza in pizzas %}
-    <li>{{ pizza }}</li>
+    <li>
+        <a href="{% url 'making_pizza:pizza' pizza.id %}">{{ pizza }}</a></li>
     {% empty %}
     <li>No pizza has been made yet.</li>
+    {% endfor %}
 </ul>
 {% endblock content %}
