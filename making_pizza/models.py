@@ -26,7 +26,7 @@ class Crust(models.Model):
 
 class Size(models.Model):
     name = models.CharField(max_length=200)
-    ratio = models.FloatField()
+    ratio = models.DecimalField(max_digits=10, decimal_places=2)
 
     def __str__(self):
         return f'{self.name} with the ratio of {self.ratio}'
@@ -38,7 +38,7 @@ class Pizza(models.Model):
     crust = models.ForeignKey(Crust, on_delete=models.CASCADE)
     size = models.ForeignKey(Size, on_delete=models.CASCADE)
     price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    notes = models.TextField()
+    notes = models.TextField(blank=True)
     date_added = models.DateTimeField(auto_now_add=True)
 
     def topping_to_string(self):
@@ -58,7 +58,19 @@ class Pizza(models.Model):
                 elif i < len(topping)-1:
                     topping_str += ' and '
             return topping_str
+      
+    def calculate_topping_price(self):
+        topping = self.extra_topping.all()
 
+        price = 0
+        for top in topping:
+            price += top.cost
 
+        return price
+    
+    def calculate_total_price(self):
+        price = (self.type.cost + self.crust.cost + self.calculate_topping_price()) * self.size.ratio
+        return price
+    
     def __str__(self):
         return f'A {self.type.name} pizza with {self.topping_to_string()} on top --> {self.price}'

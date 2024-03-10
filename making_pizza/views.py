@@ -9,7 +9,7 @@ def index(request):
 
 def pizzas(request):
     """This page shows all the pizzas"""
-    pizzas = Pizza.objects.order_by('date_added')
+    pizzas = Pizza.objects.order_by('-date_added')
     context = {'pizzas': pizzas}
     return render(request, 'making_pizza/pizzas.html', context)
 
@@ -34,8 +34,14 @@ def new_pizza(request):
     else:
         form = PizzaForm(data=request.POST)
         if form.is_valid():
-            pizza = form.save(commit=False)
-            pizza.price = 10
+            pizza = form.save()
+
+            toppings = pizza.extra_topping.all()
+            price = 0
+            for top in toppings:
+                price += top.cost
+
+            pizza.price = (pizza.type.cost + pizza.crust.cost + price) * pizza.size.ratio
             pizza.save()
             return redirect('making_pizza:pizzas')
     
