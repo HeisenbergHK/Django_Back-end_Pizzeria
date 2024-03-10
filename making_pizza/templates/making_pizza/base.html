@@ -1,5 +1,7 @@
 <p>
-    <a href="{% url 'making_pizza:index' %}">Home</a>
+    <a href="{% url 'making_pizza:index' %}">Home</a> - 
+    <a href="{% url 'making_pizza:pizzas' %}">Pizzas</a> - 
+    <a href="{% url 'making_pizza:new_pizza'%}">Order</a>
 </p>
 
 {% block content%}{% endblock content %}
