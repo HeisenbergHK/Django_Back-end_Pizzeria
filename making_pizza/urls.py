@@ -10,8 +10,10 @@ urlpatterns = [
     path('', views.index, name='index'),
     # A page to show all the pizzas
     path('pizzas', views.pizzas, name='pizzas'),
-    # detail page for each pizza
-    path('pizzas/<int:pizza_id>', views.pizza, name='pizza'),
+    # A page for all orders of a costumer
+    path('orders', views.orders, name='orders'),
+    # A page for details about an order
+    path('orders/<int:order_id>', views.order, name='order'),
     # New pizza
-    path('new_pizza', views.new_pizza, name='new_pizza'),
+    path('new_order', views.new_order, name='new_order'),
 ]

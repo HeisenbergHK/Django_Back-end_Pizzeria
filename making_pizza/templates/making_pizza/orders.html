@@ -1,12 +1,14 @@
 {% extends 'making_pizza/base.html' %}
 
 {% block content %}
-<p>Pizzas</p>
+<p>Your orders:</p>
 <ul>
-    {% for pizza in pizzas %}
-    <li>{{ pizza }}</li>
+    {% for order in orders %}
+    <li>
+        <a href="{% url 'making_pizza:order' order.id %}">{{ order }}</a></li>
     {% empty %}
     <li>No pizza has been made yet.</li>
     {% endfor %}
 </ul>
+
 {% endblock content %}
