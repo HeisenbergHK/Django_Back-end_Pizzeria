@@ -34,6 +34,10 @@ INSTALLED_APPS = [
     # My apps
     'making_pizza',
     'accounts',
+    
+    # Third party apps
+    'django_bootstrap5',
+    
     # Default apps
     'django.contrib.admin',
     'django.contrib.auth',
