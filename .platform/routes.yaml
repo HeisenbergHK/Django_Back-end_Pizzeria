@@ -1,0 +1,9 @@
+# Each route describes how an incoming URL will be processed by platforms.sh.
+
+"https://{default}/"
+  type: upstream
+  upstream: "learning_django:http"
+
+  "https://www.default/":
+    type: redirect
+    to: "https://{default}/"

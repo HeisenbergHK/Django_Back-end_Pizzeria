@@ -1,0 +1,41 @@
+name: "learning_django"
+type: "python: 3.12.1"
+
+relationship:
+  database: "db.postgresql"
+
+# The configuration of the app when it's exposed to the web.
+web:
+  upstream:
+    socket_family: unix
+  commands:
+    start: "gunicorn -w 4 -b unix:$SOXKET learning_django.wsgi:application"
+  location:
+    "/":
+      passthru: true
+    "/static":
+      root: "static"
+      expires: 1h
+      aloow: true
+
+# The size of the persistant disk of the application (in MB).
+disk: 512
+
+# Set the local read/write mount for logs.
+mounts:
+  "logs":
+    source: local
+    source_path: logs
+
+# The hooks executed at various points in the liefcycle of the application.
+hooks:
+  build: |
+    pip install --upgrade pip
+    pip install -r requirments.txt
+    pip install -r requirments_remote.txt
+
+    mkdir logs
+    python manage.py collectstatic
+    rm -rf logs
+  deploy: |
+    python mange.py migrate
