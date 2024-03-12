@@ -13,6 +13,6 @@ def get_data(request):
 @api_view(['GET'])
 def get_data_test(request):
     data = {'pizza': 'test_pizza',
-            'topping': 'tset_topping'}
+            'topping': 'test_topping'}
     return Response(data)
 
