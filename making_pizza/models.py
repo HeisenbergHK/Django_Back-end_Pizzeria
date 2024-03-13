@@ -42,6 +42,8 @@ class Pizza(models.Model):
     size = models.ForeignKey(Size, on_delete=models.CASCADE)
     price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     notes = models.TextField(blank=True)
+    quantity = models.IntegerField(default=1)
+
     date_added = models.DateTimeField(auto_now_add=True)
 
     def topping_to_string(self):
