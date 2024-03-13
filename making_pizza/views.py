@@ -50,6 +50,7 @@ def new_order(request):
         form = PizzaForm(data=request.POST)
         if form.is_valid():
             pizza = form.save(commit=False)
+            print(request.user)
             pizza.owner = request.user
             pizza = form.save()
 
