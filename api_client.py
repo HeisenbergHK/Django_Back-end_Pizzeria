@@ -1,7 +1,7 @@
-import requests
+import requests, json
 
-endpoint = 'https://github.com/public-apis/public-apis'
+endpoint = 'http://localhost:8000/api/orders'
 
-data = requests.get(endpoint)
+respond = requests.get(endpoint)
 
-print(data)
+print(respond.text)
