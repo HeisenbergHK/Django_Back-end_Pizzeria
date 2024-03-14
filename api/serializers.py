@@ -4,6 +4,11 @@ from django.contrib.auth.hashers import make_password
 
 from making_pizza.models import Pizza, Type, User, Crust, Size, Topping
 
+class PizzaSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Pizza
+        fields = '__all__'
+
 class ToppingSerializer(serializers.ModelSerializer):
     class Meta:
         model = Topping
