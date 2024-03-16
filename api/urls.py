@@ -13,4 +13,8 @@ urlpatterns = [
     path('toppings/<int:topping_id>', views.topping_detail, name='topping_detail'),
     path('crusts', views.crusts, name='crusts'),
     path('crusts/<int:crust_id>', views.crust_detail, name='crust_detail'),
+    path('user/<int:user_id>', views.user_detail, name='user_detail'),
+    path('user/signup', views.user_signup, name='user_signup'),
+    path('user/login', views.user_login, name='user_login'),
+    path('user/test_token', views.test_token, name='user_token_test'),
 ]

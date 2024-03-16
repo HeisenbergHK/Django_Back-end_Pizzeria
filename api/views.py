@@ -1,12 +1,12 @@
-from django.contrib.auth.forms import UserCreationForm
-from django.http import JsonResponse
-
 from rest_framework.response import Response 
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, authentication_classes, permission_classes
+from rest_framework.authtoken.models import Token
 from rest_framework import status
+from rest_framework.authentication import SessionAuthentication, TokenAuthentication
+from rest_framework.permissions import IsAuthenticated
 
 from making_pizza.models import Type, Pizza, Topping, Crust, Size, User
-from .serializers import TypeSerializer, UserSerializer_GET, UserSerializer_POST, PizzaSerializer, SizeSerializer, ToppingSerializer, CrustSerializer
+from .serializers import TypeSerializer, UserSerializer, PizzaSerializer, SizeSerializer, ToppingSerializer, CrustSerializer, UserSerializer_noPassword
 
 # Done
 @api_view(['GET'])
@@ -61,10 +61,13 @@ def orders(request):
 
 # Done
 @api_view(['GET', 'PUT', 'DELETE'])
+@authentication_classes([SessionAuthentication, TokenAuthentication])
+@permission_classes([IsAuthenticated])
 def order_detail(request, order_id):
-    
     try:
         order = Pizza.objects.get(id=order_id)
+        if order.owner != request.user:
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
     except Pizza.DoesNotExist:
         return Response(status=status.HTTP_204_NO_CONTENT)
     
@@ -168,4 +171,72 @@ def crust_detail(request, crust_id):
         return Response(crust_serializer.data, status=status.HTTP_200_OK)
     else:
         return Response(status=status.HTTP_400_BAD_REQUEST)
+
+# Done
+@api_view(['GET'])
+def user_detail(request, user_id):
+    try:
+        user = User.objects.get(id=user_id)
+    except User.DoesNotExist:
+        return Response(status=status.HTTP_204_NO_CONTENT)
     
+    if request.method == 'GET':
+        user_serializer = UserSerializer_noPassword(user)
+        return Response(user_serializer.data, status=status.HTTP_200_OK)
+    else:
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+
+# Done
+@api_view(['POST'])
+def user_signup(request):
+    if request.method == 'POST':
+        user_serializer = UserSerializer_noPassword(data=request.data)
+        if user_serializer.is_valid():
+            user_serializer.save()
+            # After the user has been saved to our database we can retrieve the user by the username entered by the user
+            user = User.objects.get(username=request.data['username'])
+            user.set_password(request.data['password'])
+            token = Token.objects.create(user=user)
+            print('data is ok')
+            user.save()
+            print('data is really ok!')
+            user_serializer.data['password'] = ':)'
+            return Response({'token': token.key, 'user': user_serializer.data}, status=status.HTTP_200_OK)
+        else:
+            return Response(user_serializer.errors)
+            # return Response(status=status.HTTP_400_BAD_REQUEST)
+
+    else:
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+
+# Done
+@api_view(['POST'])
+def user_login(request):
+
+    # Checking if the user exist
+    try:
+        user = User.objects.get(username=request.data['username'])
+    except User.DoesNotExist:
+        return Response(status=status.HTTP_204_NO_CONTENT)
+    
+    # Checking the password
+    if not user.check_password(request.data['password']):
+        return Response(status=status.HTTP_401_UNAUTHORIZED)
+    
+    # If the username and password is ok, then we want to get the token
+    # We use get_or_create method for making sure we have a token for that user
+    # Because maybe the token didn't create a the first place
+    token, created = Token.objects.get_or_create(user=user)
+
+    # Now we serialize the user to return it as a response
+    user_serializer = UserSerializer_noPassword(user)
+    return Response({'token': token.key, 'user': user_serializer.data}, status=status.HTTP_200_OK)
+
+# Done
+@api_view(['GET'])
+@authentication_classes([SessionAuthentication, TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def test_token(request):
+    user = request.user
+    user_serializer = UserSerializer_noPassword(user)
+    return Response({'isAuthenticated': True, 'user': user_serializer.data}, status=status.HTTP_200_OK)

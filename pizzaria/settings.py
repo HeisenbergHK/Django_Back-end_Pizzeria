@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     # Third party apps
     'django_bootstrap5',
     'rest_framework',
+    'rest_framework.authtoken',
     
     # Default apps
     'django.contrib.admin',
