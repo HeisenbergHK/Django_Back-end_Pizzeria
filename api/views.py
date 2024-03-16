@@ -3,7 +3,7 @@ from rest_framework.decorators import api_view, authentication_classes, permissi
 from rest_framework.authtoken.models import Token
 from rest_framework import status
 from rest_framework.authentication import SessionAuthentication, TokenAuthentication
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
 
 from making_pizza.models import Type, Pizza, Topping, Crust, Size, User
 from .serializers import TypeSerializer, UserSerializer, PizzaSerializer, SizeSerializer, ToppingSerializer, CrustSerializer, UserSerializer_noPassword
@@ -20,12 +20,17 @@ def pizzas(request):
 
 # Done
 @api_view(['GET', 'POST'])
+@authentication_classes([SessionAuthentication, TokenAuthentication])
+@permission_classes([IsAuthenticated])
 def orders(request):
     
     try:
-        orders = Pizza.objects.all()
+        orders = Pizza.objects.all().filter(owner=request.user)
     except Pizza.DoesNotExist:
         return Response(status=status.HTTP_204_NO_CONTENT)
+    except TypeError:
+        # If the user is AnonymousUser the owner=request.user will get a TypeError
+        return Response(status=status.HTTP_401_UNAUTHORIZED)
     
     if request.method == 'GET':
         orders_serializer = PizzaSerializer(orders, many=True)
@@ -174,11 +179,24 @@ def crust_detail(request, crust_id):
 
 # Done
 @api_view(['GET'])
+@authentication_classes([SessionAuthentication, TokenAuthentication])
+@permission_classes([IsAuthenticated])
 def user_detail(request, user_id):
     try:
         user = User.objects.get(id=user_id)
     except User.DoesNotExist:
         return Response(status=status.HTTP_204_NO_CONTENT)
+    
+    # Some old users may not yet have a a token so take care of that in here
+    try:
+        user_token = Token.objects.get(user=request.user)
+        request_token = Token.objects.get(user=user_id)
+    except Token.DoesNotExist:
+        return Response(status=status.HTTP_401_UNAUTHORIZED)
+    
+    # We now need to check wether the user want its own info or other users
+    if user_token != request_token:
+        return Response(status=status.HTTP_401_UNAUTHORIZED)
     
     if request.method == 'GET':
         user_serializer = UserSerializer_noPassword(user)
