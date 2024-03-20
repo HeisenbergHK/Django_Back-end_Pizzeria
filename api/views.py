@@ -6,7 +6,7 @@ from rest_framework.authentication import SessionAuthentication, TokenAuthentica
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 
 from making_pizza.models import Type, Pizza, Topping, Crust, Size, User
-from .serializers import TypeSerializer, UserSerializer, PizzaSerializer, SizeSerializer, ToppingSerializer, CrustSerializer, UserSerializer_noPassword
+from .serializers import TypeSerializer, UserSerializer, PizzaSerializer, PizzaSerializer_GET, SizeSerializer, ToppingSerializer, CrustSerializer, UserSerializer_noPassword
 
 # Done
 @api_view(['GET'])
@@ -18,6 +18,7 @@ def pizzas(request):
         pizza_type_serialized = TypeSerializer(pizza_types, many=True)
         return Response(pizza_type_serialized.data, status=status.HTTP_200_OK)
 
+# New
 @api_view(['GET'])
 def pizza_detail(request, pizza_id):
     try:
@@ -30,7 +31,6 @@ def pizza_detail(request, pizza_id):
     else:
         pizza_serialize = TypeSerializer(pizza)
         return Response(pizza_serialize.data, status=status.HTTP_200_OK)
-
 
 # Done
 @api_view(['GET', 'POST'])
@@ -216,7 +216,7 @@ def user_detail(request, user_id):
     except User.DoesNotExist:
         return Response(status=status.HTTP_204_NO_CONTENT)
     
-    # Some old users may not yet have a a token so take care of that in here
+    # Some old users may not yet have a token so take care of that in here
     try:
         user_token = Token.objects.get(user=request.user)
         request_token = Token.objects.get(user=user_id)
@@ -287,3 +287,30 @@ def test_token(request):
     user = request.user
     user_serializer = UserSerializer_noPassword(user)
     return Response({'isAuthenticated': True, 'user': user_serializer.data}, status=status.HTTP_200_OK)
+
+# New
+@api_view(['PUT', 'DELETE'])
+@authentication_classes([SessionAuthentication, TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def user_logout(request, user_id):
+    try:
+        user = User.objects.get(id=user_id)
+    except User.DoesNotExist:
+        return Response(status=status.HTTP_204_NO_CONTENT)
+    
+    # Now I need to check if the user that request this logout is the same as the authenticated user
+    # Remember that some user may not have a token in the database (exception handling!)
+    try:
+        user_token = Token.objects.get(user=user_id)
+        request_token = Token.objects.get(user=request.user)
+    except Token.DoesNotExist:
+        return Response(status=status.HTTP_401_UNAUTHORIZED)
+    
+    if user_token != request_token:
+        return Response(status=status.HTTP_401_UNAUTHORIZED)
+    
+    if request.method != 'DELETE':
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+    else:
+        user_token.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)

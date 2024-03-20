@@ -78,11 +78,11 @@ class PizzaSerializer_GET(serializers.ModelSerializer):
     # extra_topping_name = serializers.ReadOnlyField(source='extra_topping.name')
 
     # owner_username = serializers.ReadOnlyField(source='owner.username')
-    # owner = UserSerializer()
-    # type = TypeSerializer()
-    # crust = CrustSerializer()
-    # size = SizeSerializer()
-    # extra_topping = ToppingSerializer(many=True, read_only=True)
+    owner = UserSerializer_noPassword()
+    type = TypeSerializer()
+    crust = CrustSerializer()
+    size = SizeSerializer()
+    extra_topping = ToppingSerializer(many=True, read_only=True)
 
     class Meta:
         model = Pizza

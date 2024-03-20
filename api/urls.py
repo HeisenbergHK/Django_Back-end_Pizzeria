@@ -17,5 +17,6 @@ urlpatterns = [
     path('user/<int:user_id>', views.user_detail, name='user_detail'),
     path('user/signup', views.user_signup, name='user_signup'),
     path('user/login', views.user_login, name='user_login'),
+    path('user/logout/<int:user_id>', views.user_logout, name='user_logout'),
     path('user/test_token', views.test_token, name='user_token_test'),
 ]
