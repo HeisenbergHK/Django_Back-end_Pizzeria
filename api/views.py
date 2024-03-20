@@ -207,7 +207,7 @@ def crust_detail(request, crust_id):
         return Response(status=status.HTTP_400_BAD_REQUEST)
 
 # Done
-@api_view(['GET'])
+@api_view(['GET', 'PUT'])
 @authentication_classes([SessionAuthentication, TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def user_detail(request, user_id):
@@ -230,6 +230,32 @@ def user_detail(request, user_id):
     if request.method == 'GET':
         user_serializer = UserSerializer_noPassword(user)
         return Response(user_serializer.data, status=status.HTTP_200_OK)
+    elif request.method == 'PUT':
+        user_serializer = UserSerializer_noPassword(user, data=request.data)
+        if user_serializer.is_valid():
+            user_serializer.save()
+
+            # if request.data['password']:
+            #     # After saving the user we need to store the new password
+            #     user = User.objects.get(username=request.data['username'])
+            #     user.set_password(request.data['password'])
+            #     user.save()
+
+            try:
+                password = request.data['password']
+            except KeyError:
+                pass
+            else:
+                # After saving the user we need to store the new password
+                user = User.objects.get(username=request.data['username'])
+                user.set_password(password)
+                user.save()
+
+                
+            user_serializer.data['password'] = ':)'
+            return Response(user_serializer.data, status=status.HTTP_200_OK)
+        else:
+            return Response(status=status.HTTP_304_NOT_MODIFIED)
     else:
         return Response(status=status.HTTP_400_BAD_REQUEST)
 
@@ -244,10 +270,6 @@ def user_signup(request):
             user = User.objects.get(username=request.data['username'])
             user.set_password(request.data['password'])
             token = Token.objects.create(user=user)
-            print('data is ok')
-            user.save()
-            print('data is really ok!')
-            user_serializer.data['password'] = ':)'
             return Response({'token': token.key, 'user': user_serializer.data}, status=status.HTTP_200_OK)
         else:
             return Response(user_serializer.errors)
@@ -289,7 +311,7 @@ def test_token(request):
     return Response({'isAuthenticated': True, 'user': user_serializer.data}, status=status.HTTP_200_OK)
 
 # New
-@api_view(['PUT', 'DELETE'])
+@api_view(['DELETE'])
 @authentication_classes([SessionAuthentication, TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def user_logout(request, user_id):
