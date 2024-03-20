@@ -47,7 +47,7 @@ def orders(request):
             for i in data['extra_topping']:
                 topping_price += Topping.objects.get(id=i).cost
 
-            price = (Type.objects.get(id=data['type']).cost + Crust.objects.get(id=data['crust']).cost + topping_price) * Size.objects.get(id=data['size']).ratio
+            price = data['quantity'] * ((Type.objects.get(id=data['type']).cost + Crust.objects.get(id=data['crust']).cost + topping_price) * Size.objects.get(id=data['size']).ratio)
             
             price = round(price, 2)
             # Adding the price
@@ -80,7 +80,22 @@ def order_detail(request, order_id):
         order_serializer = PizzaSerializer(order)
         return Response(order_serializer.data, status=status.HTTP_200_OK)
     elif request.method == 'PUT':
+        data = request.data
+        
+        # We calculate the topping cost
+        topping_price = 0
+        for i in data['extra_topping']:
+            topping_price += Topping.objects.get(id=i).cost
+
+        price = data['quantity'] * ((Type.objects.get(id=data['type']).cost + Crust.objects.get(id=data['crust']).cost + topping_price) * Size.objects.get(id=data['size']).ratio)
+            
+        price = round(price, 2)
+        # Adding the price
+        data['price'] = price
+        order_serializer = PizzaSerializer(data=data)
+
         order_serializer = PizzaSerializer(order, data=request.data)
+
         if order_serializer.is_valid():
             order_serializer.save()
             return Response(order_serializer.data, status=status.HTTP_200_OK)
