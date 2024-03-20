@@ -5,6 +5,7 @@ from . import views
 app_name = 'api'
 urlpatterns = [
     path('pizzas', views.pizzas, name='pizza_type'),
+    path('pizzas/<int:pizza_id>', views.pizza_detail, name='pizza_type_detail'),
     path('orders', views.orders, name='orders'),
     path('orders/<int:order_id>', views.order_detail, name='order_detail'),
     path('sizes', views.sizes, name='sizes'),

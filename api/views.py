@@ -18,6 +18,20 @@ def pizzas(request):
         pizza_type_serialized = TypeSerializer(pizza_types, many=True)
         return Response(pizza_type_serialized.data, status=status.HTTP_200_OK)
 
+@api_view(['GET'])
+def pizza_detail(request, pizza_id):
+    try:
+        pizza = Type.objects.get(id=pizza_id)
+    except Type.DoesNotExist:
+        return Response(status=status.HTTP_204_NO_CONTENT)
+    
+    if request.method != 'GET':
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+    else:
+        pizza_serialize = TypeSerializer(pizza)
+        return Response(pizza_serialize.data, status=status.HTTP_200_OK)
+
+
 # Done
 @api_view(['GET', 'POST'])
 @authentication_classes([SessionAuthentication, TokenAuthentication])
